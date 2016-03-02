@@ -1,0 +1,147 @@
+<tool id="smc_het_eval" name="SMC-Het Evaluator" version="0.1.0">
+  <stdio>
+    <exit_code range="1:" />
+  </stdio>
+  <requirements>
+    <container type="docker">ipython/scipystack</container>
+  </requirements>
+  <command><![CDATA[
+
+#if $cellularity.submit == 'yes':
+cp ${cellularity.predfile} cellularity.predfile ;
+#end if
+#if $population.submit == 'yes':
+cp ${population.predfile} population.predfile ;
+#end if
+#if $proportion.submit == 'yes':
+cp ${proportion.predfile} proportion.predfile ;
+#end if
+#if $cluster_assignment.submit == 'yes':
+cp ${cluster_assignment.predfile} cluster_assignment.predfile ;
+#end if
+#if $cocluster_assignment.submit == 'yes':
+cp ${cocluster_assignment.predfile} cocluster_assignment.predfile ;
+#end if
+#if $cluster_assignment.submit == 'yes' and $cluster_assignment.phylogeny.submit == 'yes':
+cp ${cluster_assignment.predfile} cluster_assignment.predfile ;
+cp ${cluster_assignment.phylogeny.predfile} cluster_assignment.phylogeny.predfile ;
+#end if
+#if $cocluster_assignment.submit == 'yes' and $cocluster_assignment.ancestor.submit == 'yes':
+cp ${cocluster_assignment.predfile} cocluster_assignment.predfile ;
+cp ${cocluster_assignment.ancestor.predfile} cocluster_assignment.ancestor.predfile ;
+#end if
+
+
+tar cvzf submission.tar.gz
+#if $cellularity.submit == 'yes':
+cellularity.predfile
+#end if
+#if $population.submit == 'yes':
+population.predfile
+#end if
+#if $proportion.submit == 'yes':
+proportion.predfile
+#end if
+#if $cluster_assignment.submit == 'yes':
+cluster_assignment.predfile
+#end if
+#if $cocluster_assignment.submit == 'yes':
+cocluster_assignment.predfile
+#end if
+#if $cluster_assignment.submit == 'yes' and $cluster_assignment.phylogeny.submit == 'yes':
+cluster_assignment.predfile
+cluster_assignment.phylogeny.predfile
+#end if
+#if $cocluster_assignment.submit == 'yes' and $cocluster_assignment.ancestor.submit == 'yes':
+cocluster_assignment.predfile
+cocluster_assignment.ancestor.predfile
+#end if
+    ]]></command>
+  <inputs>
+      
+      <param name="sample" type="select" label="Sample" help="Testing Sample">
+        <options from_file="smc_samples.loc">
+          <column name="value" index="1" />
+          <column name="name" index="0" />
+        </options>
+      </param>
+      
+      <conditional name="cellularity">
+        <param type="select" name="submit" label="Submit Cellularity File" help="Input for Challenge 1A">
+          <option value="yes">Yes</option>
+          <option value="no" selected="True">No</option>
+        </param>
+        <when value="yes">
+          <param name="predfile" type="data" format="txt" label="Predicted Cellularity File"/>
+        </when>
+      </conditional> 
+      
+      <conditional name="population">
+        <param type="select" name="submit" label="Submit Population File" help="Input for Challenge 1B">
+          <option value="yes">Yes</option>
+          <option value="no" selected="True">No</option>
+        </param>
+        <when value="yes">
+          <param name="predfile" type="data" format="txt" label="Predicted Population File"/>
+        </when>
+      </conditional> 
+      
+      <conditional name="proportion">
+        <param type="select" name="submit" label="Submit  Proportion File" help="Input for Challenge 1C">
+          <option value="yes">Yes</option>
+          <option value="no" selected="True">No</option>
+        </param>
+        <when value="yes">
+          <param name="predfile" type="data" format="txt" label="Predicted Proportion File"/>
+        </when>
+      </conditional> 
+      
+      <conditional name="cluster_assignment">
+        <param type="select" name="submit" label="Submit Assignment File" help="Input for Challenge 2A">
+          <option value="yes">Yes</option>
+          <option value="no" selected="True">No</option>
+        </param>
+        <when value="yes">
+          <param name="predfile" type="data" format="txt" label="Cluster Assignment File"/>
+          
+          <conditional name="phylogeny">
+            <param type="select" name="submit" label="Submit Phylogeny Matrix" help="Input for Challenge 3A">
+              <option value="yes">Yes</option>
+              <option value="no" selected="True">No</option>
+            </param>
+            <when value="yes">
+              <param name="predfile" type="data" format="txt" label="Phylogeny Matrix"/>
+            </when>
+          </conditional>
+        </when>
+      </conditional> 
+
+
+      <conditional name="cocluster_assignment">
+        <param type="select" name="submit" label="Submit Co-clustering Matrix" help="Input for Challenge 2B">
+          <option value="yes">Yes</option>
+          <option value="no" selected="True">No</option>
+        </param>
+        <when value="yes">
+          <param name="predfile" type="data" format="txt" label="Co-clustering Matrix"/>
+          
+          <conditional name="ancestor">
+            <param type="select" name="submit" label="Submit Ancestor Matrix" help="Input for Challenge 3B">
+              <option value="yes">Yes</option>
+              <option value="no" selected="True">No</option>
+            </param>
+            <when value="yes">
+              <param name="predfile" type="data" format="txt" label="Ancestor Matrix"/>
+            </when>
+          </conditional>
+        </when>
+      </conditional> 
+  </inputs>
+  <outputs>
+      <data name="outfile" format="data" from_work_dir="submission.tar.gz" label="Evaluation Scores"/>
+  </outputs>  
+
+  <help><![CDATA[
+      TODO: Fill in help.
+]]></help>
+</tool>
