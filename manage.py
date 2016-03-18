@@ -13,10 +13,31 @@ def command_list(syn, args):
     print '\n\nSubmissions for: %s %s' % (evaluation.id, evaluation.name.encode('utf-8'))
     print '-' * 60
 
+    print "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s" % (
+        "EntryID",
+        "Date",
+        "Status",
+        "ProjectID",
+        "EntryName",
+        "Email",
+        "Name",
+        "Organisation"
+    )
     for submission, status in syn.getSubmissionBundles(evaluation):
-        print submission.id, submission.createdOn, status.status, submission.name.encode('utf-8'), submission.userId
+        user = syn.getUserProfile(submission.userId)
         s = syn.getSubmission(submission.id)
-        print s.entity
+        print "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s" % (
+            submission.id,
+            submission.createdOn,
+            status.status,
+            s.entity.annotations['synapse_projectid'][0],
+            submission.name.encode('utf-8'),
+            "%s@synapse.org" % (user['userName']),
+            "%s %s" % (user['firstName'], user['lastName']),
+            user['company']
+        )
+        #print submission.entity
+        #print s.entity
         
 def command_download(syn, args):
     if not os.path.exists(args.out):
