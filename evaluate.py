@@ -119,9 +119,10 @@ def command_run(args):
             inputs=input_data,
             step_tags={
                 eval_uuid : {
-                    "outfile" : [ "entry:%s" % args.entry_name, "tumor:%s" % args.tumor_name ]
+                    "outfile" : [ "result_tar" ]
                 }
-            }
+            },
+            tags = [ "entry:%s" % args.entry_name, "tumor:%s" % args.tumor_name ]
     )
     
     print json.dumps(task.to_dict(), indent=4)
@@ -134,7 +135,7 @@ def command_extract(args):
     #ds = nebula.docstore.AgroDocStore(args.agro, "workdir")
     if not os.path.exists(args.out):
         os.mkdir(args.out)
-    for t, meta in ds.filter(type='file', name="Evaluation Scores", state="ok"):
+    for t, meta in ds.filter(type='file', name="Evaluation Scores"):
         tumor = None
         entry = None
         for tag in meta['tags']:
@@ -143,11 +144,23 @@ def command_extract(args):
             if tag.startswith("entry:"):
                 entry = tag.split(":")[1]
         if tumor is not None and entry is not None:
-            print t, meta.get('name', 'NA'), meta['tags'], meta['state']
-            f = ds.get_filename(nebula.Target(t))
             if not os.path.exists(os.path.join(args.out, tumor)):
                 os.makedirs(os.path.join(args.out, tumor))
-            shutil.copy( f, os.path.join(args.out, tumor, entry + ".tar.gz") )
+            print t, meta.get('name', 'NA'), meta['tags'], meta['state']
+            if meta['state'] == "ok" and ds.size(nebula.Target(t)) > 0:
+                f = ds.get_filename(nebula.Target(t))
+                print "Copying entry %s %s to %s" % (entry, tumor, f)
+                shutil.copy( f, os.path.join(args.out, tumor, entry + ".tar.gz") )
+            else:
+                print "searching", entry
+                with open( os.path.join(args.out, tumor, entry + ".error_log" ), "w" ) as handle:
+                    for i, meta2 in ds.filter(type='file', tags=["entry:%s" % entry]):
+                        if "tumor:%s" % (tumor) in meta2['tags']:
+                            if meta2['state'] == 'error':
+                                handle.write("Tool:%s : STDOUT\n" % meta2['job']['tool_id'])
+                                handle.write("%s\n" % (meta2['job']['stdout']))
+                                handle.write("Tool:%s : STDERR\n" % meta2['job']['tool_id'])
+                                handle.write("%s\n" % (meta2['job']['stderr']))
 
 def galaxy_tool_prefix_docker(xml_text, new_prefix):
     dom = parseXML(xml_text)
@@ -220,6 +233,16 @@ def command_loadinputs(args):
     ds.update_from_file(nebula.Target(cna_uuid), args.cna_input, create=True)
     ds.put(cna_uuid, {'tumor_name' : args.tumor_name, 'type' : 'testing_input', 'file_type' : 'cna'})
 
+def command_clean(args):
+    ds = nebula.docstore.FileDocStore(args.agro)
+    error_count = 0
+    for id, entry in ds.filter(state='error'):
+        if entry.get('state', '') == 'error':
+            #print "Delete", id
+            ds.delete(nebula.Target(id))
+            error_count += 1
+    print "Error count", error_count
+
 def command_list(args):
     ds = nebula.docstore.FileDocStore(args.agro)
     #ds = nebula.docstore.AgroDocStore(args.agro, "workdir")
@@ -227,6 +250,18 @@ def command_list(args):
     if args.type == "tumor":
         for t, meta in ds.filter(type="testing_input"):
             print meta['tumor_name'], meta['file_type'], t
+
+    if args.type == "result":
+        for t, meta in ds.filter():
+            if 'tags' in meta and len(meta['tags']):
+                print t, meta.get("tags", None), meta.get('state', None)
+    
+    if args.type == "error":
+        for t, meta in ds.filter(state="error"):
+            print t, meta['tags']
+            print meta['job']['stdout']
+            print meta['job']['stderr']
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -252,6 +287,9 @@ if __name__ == "__main__":
     parser_list = subparsers.add_parser("list")
     parser_list.add_argument("type")
     parser_list.set_defaults(func=command_list)
+
+    parser_clean = subparsers.add_parser("clean")
+    parser_clean.set_defaults(func=command_clean)
 
     parser_extract = subparsers.add_parser("extract")
     parser_extract.add_argument("--out", default="output")

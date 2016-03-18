@@ -32,7 +32,7 @@ cp ${cocluster_assignment.ancestor.predfile} cocluster_assignment.ancestor.predf
 #end if
 
 
-tar cvzf submission.tar.gz
+tar cvzf $outfile
 #if $cellularity.submit == 'yes':
 cellularity.predfile
 #end if
@@ -59,12 +59,12 @@ cocluster_assignment.ancestor.predfile
     ]]></command>
   <inputs>
       
-      <param name="sample" type="select" label="Sample" help="Testing Sample">
+      <!-- param name="sample" type="select" label="Sample" help="Testing Sample">
         <options from_file="smc_samples.loc">
           <column name="value" index="1" />
           <column name="name" index="0" />
         </options>
-      </param>
+      </param -->
       
       <conditional name="cellularity">
         <param type="select" name="submit" label="Submit Cellularity File" help="Input for Challenge 1A">
@@ -138,7 +138,7 @@ cocluster_assignment.ancestor.predfile
       </conditional> 
   </inputs>
   <outputs>
-      <data name="outfile" format="data" from_work_dir="submission.tar.gz" label="Evaluation Scores"/>
+      <data name="outfile" format="data" label="Evaluation Scores"/>
   </outputs>  
 
   <help><![CDATA[

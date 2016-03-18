@@ -16,12 +16,14 @@ def command_list(syn, args):
     for submission, status in syn.getSubmissionBundles(evaluation):
         print submission.id, submission.createdOn, status.status, submission.name.encode('utf-8'), submission.userId
         s = syn.getSubmission(submission.id)
-        print s.entity
+        #print s.entity
         
 def command_download(syn, args):
     if not os.path.exists(args.out):
         os.mkdir(args.out)
     for i in args.ids:
+
+        print "entry", i
         entry_dir = os.path.join(args.out, i)
         if not os.path.exists(entry_dir):
             os.mkdir(entry_dir)
