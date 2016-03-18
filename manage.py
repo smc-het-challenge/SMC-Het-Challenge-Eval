@@ -43,6 +43,8 @@ def command_download(syn, args):
     if not os.path.exists(args.out):
         os.mkdir(args.out)
     for i in args.ids:
+
+        print "entry", i
         entry_dir = os.path.join(args.out, i)
         if not os.path.exists(entry_dir):
             os.mkdir(entry_dir)
