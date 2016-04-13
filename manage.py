@@ -34,7 +34,7 @@ def command_list(syn, args):
             submission.name.encode('utf-8'),
             "%s@synapse.org" % (user['userName']),
             "%s %s" % (user['firstName'], user['lastName']),
-            user['company']
+            user.get('company', '')
         )
         #print submission.entity
         #print s.entity
@@ -58,7 +58,7 @@ def command_download(syn, args):
 
 def command_info(syn, args):
     sub = syn.getSubmission(args.id)
-    print sub
+    print sub.entity
 
 def command_delete(syn, args):
     sub = syn.getSubmission(args.id)

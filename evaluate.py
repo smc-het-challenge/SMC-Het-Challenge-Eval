@@ -135,32 +135,33 @@ def command_extract(args):
     #ds = nebula.docstore.AgroDocStore(args.agro, "workdir")
     if not os.path.exists(args.out):
         os.mkdir(args.out)
-    for t, meta in ds.filter(type='file', name="Evaluation Scores"):
-        tumor = None
-        entry = None
-        for tag in meta['tags']:
-            if tag.startswith("tumor:"):
-                tumor = tag.split(":")[1]
-            if tag.startswith("entry:"):
-                entry = tag.split(":")[1]
-        if tumor is not None and entry is not None:
-            if not os.path.exists(os.path.join(args.out, tumor)):
-                os.makedirs(os.path.join(args.out, tumor))
-            print t, meta.get('name', 'NA'), meta['tags'], meta['state']
-            if meta['state'] == "ok" and ds.size(nebula.Target(t)) > 0:
-                f = ds.get_filename(nebula.Target(t))
-                print "Copying entry %s %s to %s" % (entry, tumor, f)
-                shutil.copy( f, os.path.join(args.out, tumor, entry + ".tar.gz") )
-            else:
-                print "searching", entry
-                with open( os.path.join(args.out, tumor, entry + ".error_log" ), "w" ) as handle:
-                    for i, meta2 in ds.filter(type='file', tags=["entry:%s" % entry]):
-                        if "tumor:%s" % (tumor) in meta2['tags']:
-                            if meta2['state'] == 'error':
-                                handle.write("Tool:%s : STDOUT\n" % meta2['job']['tool_id'])
-                                handle.write("%s\n" % (meta2['job']['stdout']))
-                                handle.write("Tool:%s : STDERR\n" % meta2['job']['tool_id'])
-                                handle.write("%s\n" % (meta2['job']['stderr']))
+    for t, meta in ds.filter(type='file'):
+        if 'job' in meta and meta['job']["tool_id"] == "smc_het_eval":
+            tumor = None
+            entry = None
+            for tag in meta['tags']:
+                if tag.startswith("tumor:"):
+                    tumor = tag.split(":")[1]
+                if tag.startswith("entry:"):
+                    entry = tag.split(":")[1]
+            if tumor is not None and entry is not None:
+                if not os.path.exists(os.path.join(args.out, tumor)):
+                    os.makedirs(os.path.join(args.out, tumor))
+                print t, meta.get('name', 'NA'), meta['tags'], meta['state']
+                if meta['state'] == "ok" and ds.size(nebula.Target(t)) > 0:
+                    f = ds.get_filename(nebula.Target(t))
+                    print "Copying entry %s %s to %s" % (entry, tumor, f)
+                    shutil.copy( f, os.path.join(args.out, tumor, entry + ".tar.gz") )
+                else:
+                    print "searching", entry
+                    with open( os.path.join(args.out, tumor, entry + ".error_log" ), "w" ) as handle:
+                        for i, meta2 in ds.filter(type='file', tags=["entry:%s" % entry]):
+                            if "tumor:%s" % (tumor) in meta2['tags']:
+                                if meta2['state'] == 'error':
+                                    handle.write("Tool:%s : STDOUT\n" % meta2['job']['tool_id'])
+                                    handle.write("%s\n" % (meta2['job']['stdout']))
+                                    handle.write("Tool:%s : STDERR\n" % meta2['job']['tool_id'])
+                                    handle.write("%s\n" % (meta2['job']['stderr']))
 
 def galaxy_tool_prefix_docker(xml_text, new_prefix):
     dom = parseXML(xml_text)
@@ -168,7 +169,9 @@ def galaxy_tool_prefix_docker(xml_text, new_prefix):
     if scan is not None:
         for node, prefix, attrs, text in scan:
             if 'type' in attrs and attrs['type'] == 'docker':
-                node.childNodes[0].data = "%s/%s" % (new_prefix, node.childNodes[0].data)
+                new_tag = "%s/%s" % (new_prefix, node.childNodes[0].data)
+                print "changing %s to %s" % (node.childNodes[0].data, new_tag)                
+                node.childNodes[0].data = new_tag #"%s/%s" % (new_prefix, node.childNodes[0].data)
                 #docker_tag = text
     #print dom
     return dom.toxml()
@@ -205,6 +208,7 @@ def command_rename(args):
         in_image = tarfile.open(image_file)
         out_image = tarfile.open(os.path.join(out_dir, os.path.basename(image_file)), "w")
         for member in in_image.getmembers():
+            print "found", member.name
             if member.name == "repositories":
                 handle = in_image.extractfile(member)
                 json_text = handle.read()
@@ -213,6 +217,19 @@ def command_rename(args):
                 for k,v in meta.items():
                     out[ "%s/%s" % (entry_id, k) ] = v
                 out_text = json.dumps(out)
+                member.size = len(out_text)
+                out_image.addfile(member, StringIO(out_text))
+            elif member.name == "manifest.json":
+                handle = in_image.extractfile(member)
+                json_text = handle.read()
+                meta = json.loads(json_text)
+                for elem in meta:
+                    if "RepoTags" in elem:
+                        out = []
+                        for i in elem["RepoTags"]:
+                            out.append( "%s/%s" % (entry_id, i) )
+                        elem["RepoTags"] = out
+                out_text = json.dumps(meta)
                 member.size = len(out_text)
                 out_image.addfile(member, StringIO(out_text))
             else:
@@ -285,7 +302,7 @@ if __name__ == "__main__":
     parser_loadinputs.set_defaults(func=command_loadinputs)
 
     parser_list = subparsers.add_parser("list")
-    parser_list.add_argument("type")
+    parser_list.add_argument("type", choices=['tumor', 'result', 'error'])
     parser_list.set_defaults(func=command_list)
 
     parser_clean = subparsers.add_parser("clean")
