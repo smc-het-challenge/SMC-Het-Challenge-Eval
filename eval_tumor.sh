@@ -1,8 +1,8 @@
 #!/bin/bash
 
-$BASE=$(dirname $0)
+$BASE="$(cd `dirname $0`; pwd)"
 
-$ENTRY=$1
+ENTRY=$1
 
 . venv/bin/activate
 cd $BASE
