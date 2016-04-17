@@ -10,4 +10,4 @@ gcloud compute instances create smc-het-eval-$EVAL_ID \
 --scopes storage-rw --machine-type n1-standard-4
 
 
- gcloud compute ssh smc-het-eval-$EVAL_ID "nohup sudo sudo -u galaxy /home/galaxy/SMC-Het-Challenge-Eval/eval_tumor.sh $EVAL_ID > test.out 2> test.err &" 
+ gcloud compute ssh smc-het-eval-$EVAL_ID "nohup sudo sudo -u galaxy bash /home/galaxy/SMC-Het-Challenge-Eval/eval_tumor.sh $EVAL_ID > test.out 2> test.err &" 
