@@ -32,6 +32,8 @@ tar cvzf smc_het_evalcopy.tar.gz smc_het_evalcopy
 
 for a in 1 2 3 7; do 
   ./evaluate.py --agro test_data run Tumour$a $ENTRY $ENTRY/repack/
+  sudo chown -R galaxy:galaxy test_data
+  sudo rm -rf galaxy_work
 done
 ./evaluate.py --agro test_data extract
 
