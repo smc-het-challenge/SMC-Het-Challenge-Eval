@@ -38,3 +38,5 @@ done
 ./evaluate.py --agro test_data extract
 
 gsutil cp -r output/* gs://smc-het-entries/results/
+
+sudo poweroff
