@@ -12,8 +12,10 @@ def command_list(syn, args):
     evaluation = syn.getEvaluation(EVALUATION_QUEUE_ID)
     print '\n\nSubmissions for: %s %s' % (evaluation.id, evaluation.name.encode('utf-8'))
     print '-' * 60
-
-    print "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s" % (
+    format_str = "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s"
+    if args.tab:
+        format_str = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+    print format_str % (
         "EntryID",
         "Date",
         "Status",
@@ -26,7 +28,7 @@ def command_list(syn, args):
     for submission, status in syn.getSubmissionBundles(evaluation):
         user = syn.getUserProfile(submission.userId)
         s = syn.getSubmission(submission.id)
-        print "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s" % (
+        print format_str % (
             submission.id,
             submission.createdOn,
             status.status,
@@ -72,6 +74,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(title="subcommand")
     
     parser_list = subparsers.add_parser('list', help="List submissions to an evaluation or list evaluations")
+    parser_list.add_argument("-t", dest="tab", action="store_true", default=False)
     parser_list.set_defaults(func=command_list)
 
     parser_info = subparsers.add_parser('info', help="List submissions to an evaluation or list evaluations")
