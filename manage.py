@@ -54,8 +54,24 @@ def command_download(syn, args):
                 print "downloading", ent_id
                 ent = syn.get(ent_id)
                 print ent.path
-                shutil.copy(ent.path, os.path.join(entry_dir, os.path.basename(ent.path)))
+                if not args.cache_only:
+                    shutil.copy(ent.path, os.path.join(entry_dir, os.path.basename(ent.path)))
 
+def command_missing(syn, args):
+    missing = []
+    evaluation = syn.getEvaluation(EVALUATION_QUEUE_ID)
+    for submission, status in syn.getSubmissionBundles(evaluation):
+        sub = syn.getSubmission(submission.id)
+        for ents in ['image_entities', 'tool_entities', 'workflow_entity', 'data_entities']:
+            for ent_id in sub.entity.annotations[ents]:
+                try:
+                    ent = syn.get(ent_id)
+                except:
+                    missing.append( (submission.id, ent_id) )
+    for subid, ent in missing:
+        print subid, ent
+
+                    
 def command_info(syn, args):
     sub = syn.getSubmission(args.id)
     print sub.entity
@@ -84,9 +100,13 @@ if __name__ == "__main__":
 
 
     parser_download = subparsers.add_parser('download', help="Download submissions to an evaluation or list evaluations")
+    parser_download.add_argument("--cache-only", action="store_true", default=False)
     parser_download.add_argument("--out", default="entries")
     parser_download.add_argument("ids", nargs="+")
     parser_download.set_defaults(func=command_download)
+
+    parser_missing = subparsers.add_parser('missing')
+    parser_missing.set_defaults(func=command_missing)
 
     args = parser.parse_args()
     syn = synapseclient.Synapse()
