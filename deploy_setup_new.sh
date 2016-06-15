@@ -8,6 +8,6 @@ fi
 
 sudo apt-get install -y virtualenv python-pip
 virtualenv venv
-env/bin/activate
+venv/bin/activate
 pip install git+git://github.com/kellrott/gwftool.git
 
