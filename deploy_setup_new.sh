@@ -3,7 +3,7 @@
 which docker
 if [ "$?" != "0" ]; then
   curl https://get.docker.com/ | bash -
-  sudo usermod -aG docker ubuntu
+  sudo usermod -aG docker $USER
 fi
 
 sudo apt-get install -y virtualenv python-pip
