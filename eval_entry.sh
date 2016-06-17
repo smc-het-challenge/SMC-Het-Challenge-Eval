@@ -5,7 +5,7 @@ ENTRY=$1
 
 cd $BASE
 
-. venv/bin/activate
+#. venv/bin/activate
 
 #TUMORS=gs://smc-het-entries/tumors/
 TUMORS=gs://evaluation_tumours/*
@@ -23,8 +23,8 @@ done
 popd
 
 gsutil cp -n -r gs://smc-het-entries/$ENTRY ./
-python het-evaluate.py docker-rename $ENTRY/
-python het-evaluate.py unpack $ENTRY/repack/
+venv/bin/python het-evaluate.py docker-rename $ENTRY/
+venv/bin/python het-evaluate.py unpack $ENTRY/repack/
 
 for a in tumors/*/*.mutect.vcf; do
   b=`echo $a | sed -e 's/.mutect.vcf$//'`
