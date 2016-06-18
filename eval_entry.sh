@@ -7,8 +7,8 @@ cd $BASE
 
 #. venv/bin/activate
 
-#TUMORS=gs://smc-het-entries/tumors/
-TUMORS=gs://evaluation_tumours/*
+TUMORS=gs://smc-het-entries/test_tumors/*
+#TUMORS=gs://evaluation_tumours/*
 
 if [ ! -e tumors ]; then
   mkdir tumors
@@ -29,12 +29,14 @@ venv/bin/python het-evaluate.py unpack $ENTRY/repack/
 for a in tumors/*/*.mutect.vcf; do
   b=`echo $a | sed -e 's/.mutect.vcf$//'`
   name=`basename $a | sed -e 's/.mutect.vcf$//'`
-  if [ ! -e $name ]; then
-    mkdir output/$name
+  if [ ! -e output/$ENTRY/$name ]; then
+    mkdir -p output/$ENTRY/$name
   fi
-  bash ./eval_entry_tumor.sh $ENTRY/repack/ $b output/$name
+  bash ./eval_entry_tumor.sh $ENTRY/repack/ $b output/$ENTRY/$name
 done
 
-#gsutil cp -r output/* gs://smc-het-entries/results/
+gsutil cp -r output/* gs://smc-het-entries/results/
 
-#sudo poweroff
+if [ -e "$2" == "shutdown" ]; then
+  sudo poweroff
+fi
