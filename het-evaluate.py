@@ -5,11 +5,13 @@ Code to run challenge workflows
 """
 
 import os
+import re
 import uuid
 import json
 import shutil
 import argparse
 import subprocess
+import shutil
 import logging
 from glob import glob
 from xml.dom.minidom import parseString as parseXML
@@ -188,6 +190,25 @@ def command_unpack(args):
     for docker_image in glob(os.path.join(args.entry, "*.tar")):
         subprocess.check_call(["docker", "load", "-i", docker_image])
         
+def command_extract(args):
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
+        
+    for entry_dir in glob(os.path.join(args.result_dir, "*")):
+        for tumor_dir in glob(os.path.join(entry_dir, "*")):
+            for meta_file in glob(os.path.join(tumor_dir, "*.json")):
+                print meta_file
+                with open(meta_file) as handle:
+                    meta = json.loads(handle.read())
+                if meta['tool'] == 'smc_het_eval':
+                    out_file = os.path.join(tumor_dir, re.sub(".json$", "", os.path.basename(meta_file)), "outfile")
+                    print out_file, os.path.exists(out_file)
+                    dst = os.path.join(args.output_dir, "%s.%s.tar.gz" % (
+                        os.path.basename(entry_dir),
+                        os.path.basename(tumor_dir)
+                    ))
+                    print "cp", out_file, dst
+                    shutil.copy(out_file, dst)
 
 
 EVAL_COPY_TOOL = """<tool id="smc_het_eval" name="SMC-Het Evaluator" version="0.1.0">
@@ -357,6 +378,11 @@ if __name__ == "__main__":
     parser_unpack = subparsers.add_parser('unpack')
     parser_unpack.add_argument("entry")
     parser_unpack.set_defaults(func=command_unpack)
+    
+    parser_extract = subparsers.add_parser('extract')
+    parser_extract.add_argument("result_dir")
+    parser_extract.add_argument("output_dir")
+    parser_extract.set_defaults(func=command_extract)
     
     args = parser.parse_args()
     args.func(args)
