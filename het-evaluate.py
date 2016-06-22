@@ -32,6 +32,10 @@ def getText(nodelist):
 
 def dom_scan(node, query):
     stack = query.split("/")
+    if node.localName is None and len(node.childNodes):
+        for i in node.childNodes:
+            if i.localName == stack[0]:
+                return dom_scan_iter(i, stack[1:], [stack[0]])
     if node.localName == stack[0]:
         return dom_scan_iter(node, stack[1:], [stack[0]])
 
@@ -55,10 +59,10 @@ def tool_dir_scan(tool_dir):
     for tool_conf in glob(os.path.join(os.path.abspath(tool_dir), "*.xml")) + glob(os.path.join(os.path.abspath(tool_dir), "*", "*.xml")):
         logging.info("Scanning: " + tool_conf)
         dom = parseXML(tool_conf)
-        s = dom_scan(dom.childNodes[0], "tool")
+        s = dom_scan(dom, "tool")
         if s is not None:
             docker_tag = None
-            scan = dom_scan(dom.childNodes[0], "tool/requirements/container")
+            scan = dom_scan(dom, "tool/requirements/container")
             if scan is not None:
                 for node, prefix, attrs, text in scan:
                     if 'type' in attrs and attrs['type'] == 'docker':
@@ -111,7 +115,7 @@ def command_run(args):
 
 def galaxy_tool_prefix_docker(xml_text, new_prefix):
     dom = parseXML(xml_text)
-    scan = dom_scan(dom.childNodes[0], "tool/requirements/container")
+    scan = dom_scan(dom, "tool/requirements/container")
     if scan is not None:
         for node, prefix, attrs, text in scan:
             if 'type' in attrs and attrs['type'] == 'docker':
