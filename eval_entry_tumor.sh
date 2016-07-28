@@ -8,10 +8,13 @@ cd $BASE
 
 #. venv/bin/activate
 
-TUMOR_DIR=gs://smc-het-entries/test_tumors/$TUMOR
+TUMOR_DIR=gs://evaluation_tumours_1/$TUMOR.tar.gz
 
 if [ ! -e tumors ]; then
   mkdir tumors
+fi
+if [ ! -e entries ]; then
+    mkdir entries
 fi
 
 gsutil cp -n -r $TUMOR_DIR ./tumors/
@@ -22,17 +25,17 @@ for a in *.gz; do
 done
 popd
 
-gsutil cp -n -r gs://smc-het-entries/$ENTRY ./
-venv/bin/python het-evaluate.py docker-rename $ENTRY/
-venv/bin/python het-evaluate.py unpack $ENTRY/repack/
+gsutil cp -n -r gs://smc-het-entries/$ENTRY ./entries/
+venv/bin/python het-evaluate.py docker-rename ./entries/$ENTRY/
+venv/bin/python het-evaluate.py unpack ./entries/$ENTRY/repack/
 
-for a in tumors/*/*.mutect.vcf; do
+for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
   b=`echo $a | sed -e 's/.mutect.vcf$//'`
   name=`basename $a | sed -e 's/.mutect.vcf$//'`
   if [ ! -e output/$ENTRY/$name ]; then
     mkdir -p output/$ENTRY/$name
   fi
-  bash ./run_eval_entry_tumor.sh $ENTRY/repack/ $b output/$ENTRY/$name
+  bash ./run_eval_entry_tumor.sh entries/$ENTRY/repack/ $b output/$ENTRY/$name
   gsutil cp -n -r output/* gs://smc-het-entries/results/
 done
 
