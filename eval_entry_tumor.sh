@@ -8,7 +8,7 @@ cd $BASE
 
 #. venv/bin/activate
 
-TUMOR_DIR=gs://evaluation_tumours_1/$TUMOR.tar.gz
+TUMOR_DIR=gs://smc-het-evaluation/tumours/$TUMOR.tar.gz
 
 if [ ! -e tumors ]; then
   mkdir tumors
@@ -25,7 +25,7 @@ for a in *.gz; do
 done
 popd
 
-gsutil cp -n -r gs://smc-het-entries/$ENTRY ./entries/
+gsutil cp -n -r gs://smc-het-evaluation/entries/$ENTRY ./entries/
 venv/bin/python het-evaluate.py docker-rename ./entries/$ENTRY/
 venv/bin/python het-evaluate.py unpack ./entries/$ENTRY/repack/
 
@@ -36,10 +36,10 @@ for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
     mkdir -p output/$ENTRY/$name
   fi
   bash ./run_eval_entry_tumor.sh entries/$ENTRY/repack/ $b output/$ENTRY/$name
-  gsutil cp -n -r output/* gs://smc-het-entries/results/
+  gsutil cp -n -r output/* gs://smc-het-evaluation/results/
 done
 
 
-if [ -e "$2" == "shutdown" ]; then
+if [ "$3" == "shutdown" ]; then
   sudo poweroff
-fi0
+fi
