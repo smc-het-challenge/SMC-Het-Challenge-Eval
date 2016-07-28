@@ -32,7 +32,7 @@ for a in tumors/*/*.mutect.vcf; do
   if [ ! -e output/$ENTRY/$name ]; then
     mkdir -p output/$ENTRY/$name
   fi
-  bash ./eval_entry_tumor.sh $ENTRY/repack/ $b output/$ENTRY/$name
+  bash ./run_eval_entry_tumor.sh $ENTRY/repack/ $b output/$ENTRY/$name
   gsutil cp -n -r output/* gs://smc-het-entries/results/
 done
 
