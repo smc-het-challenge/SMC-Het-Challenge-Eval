@@ -36,7 +36,7 @@ for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
     mkdir -p output/$ENTRY/$name
   fi
   bash ./run_eval_entry_tumor.sh entries/$ENTRY/repack/ $b output/$ENTRY/$name
-  gsutil cp -n -r output/* gs://smc-het-evaluation/results/
+  gsutil cp -n -r output/* gs://smc-het-evaluation/outputs/
 done
 
 
