@@ -8,15 +8,21 @@ import argparse
 
 EVALUATION_QUEUE_ID = 4487063
 
+
+def clean_str(s):
+    #return s.encode('utf-8').replace(u"\xe4", u"a").replace(u'\xf6', u"o").replace(u'\xe1', u"a")
+    return s
+
 def command_list(syn, args):
     evaluation = syn.getEvaluation(EVALUATION_QUEUE_ID)
     print '\n\nSubmissions for: %s %s' % (evaluation.id, evaluation.name.encode('utf-8'))
     print '-' * 60
-    format_str = "%-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s"
+    format_str = "%-8s %-8s %-30s %-10s %-10s %-30s %-30s %-20s %-20s"
     if args.tab:
-        format_str = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+        format_str = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
     print format_str % (
         "EntryID",
+        "Team ID",
         "Date",
         "Status",
         "ProjectID",
@@ -26,17 +32,19 @@ def command_list(syn, args):
         "Organisation"
     )
     for submission, status in syn.getSubmissionBundles(evaluation):
+        team = syn.getTeam(submission.teamId)
         user = syn.getUserProfile(submission.userId)
         s = syn.getSubmission(submission.id)
         print format_str % (
             submission.id,
+            clean_str(team.name),
             submission.createdOn,
             status.status,
             s.entity.annotations['synapse_projectid'][0],
-            submission.name.encode('utf-8'),
+            clean_str(submission.name),
             "%s@synapse.org" % (user['userName']),
-            "%s %s" % (user['firstName'], user['lastName']),
-            user.get('company', '')
+            clean_str("%s %s" % (user['firstName'], user['lastName'])),
+            clean_str(user.get('company', ''))
         )
         #print submission.entity
         #print s.entity
