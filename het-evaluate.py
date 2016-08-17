@@ -70,13 +70,23 @@ def tool_dir_scan(tool_dir):
                         
             yield list(s)[0][2]['id'], tool_conf, docker_tag
     
-
+def get_workflow_inputs(ga_path):
+    with open(ga_path) as handle:
+        wf = json.loads(handle.read())
+    out = []
+    steps = wf['steps']
+    for i in steps.values():
+        if i['type'] == "data_input":
+            out.append(i['inputs'][0]['name'])
+    return out
 
 def command_run(args):
     
     ga_files = glob(os.path.join(args.entry_dir, "*.ga"))
     assert(len(ga_files) == 1)
 
+    wf_inputs = get_workflow_inputs(ga_files[0])
+    
     input_json = {
       "VCF_INPUT" : {
         "class" : "File",
@@ -89,6 +99,12 @@ def command_run(args):
       "sample" : "Tumour"  
     }
     
+    if 'CELLULARITY_INPUT' in wf_inputs:
+        input_json['CELLULARITY_INPUT'] = {
+            "class" : "File",
+            "path" : os.path.abspath(args.tumor_base + ".cellularity_ploidy.txt")
+        }
+
     if not os.path.exists(args.workdir):
         os.mkdir(args.workdir)
     input_path = os.path.join(args.workdir, "input.json")
