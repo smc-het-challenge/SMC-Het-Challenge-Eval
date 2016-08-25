@@ -2,13 +2,18 @@
 
 ENTRY_ID=$1
 TUMOR_ID=$2
+TUMOR_LOWER=`echo $TUMOR_ID | tr "[[:upper:]]" "[[:lower:]]"`
 DISK_SIZE=150
 
-gcloud compute disks create smc-het-eval-disk-$EVAL_ID \
---source-snapshot smc-het-testing --size $DISK_SIZE
+PROJECT=galaxyprojectsmc
 
-gcloud compute instances create smc-het-eval-$EVAL_ID \
---disk name=smc-het-eval-disk-$EVAL_ID,auto-delete=yes,boot=yes \
---scopes storage-rw --machine-type n1-standard-4
+gcloud compute disks create smc-het-eval-disk-$ENTRY_ID-$TUMOR_LOWER \
+--source-snapshot smc-het-eval-image --size $DISK_SIZE --project $PROJECT
 
- gcloud compute ssh smc-het-eval-$EVAL_ID "nohup sudo sudo -u ubuntu bash /home/ubuntu/SMC-Het-Challenge-Eval/eval_entry_tumor.sh $ENTRY_ID $TUMOR_ID shutdown > test.out 2> test.err &" 
+gcloud compute instances create smc-het-eval-$ENTRY_ID-$TUMOR_LOWER \
+--disk name=smc-het-eval-disk-$ENTRY_ID-$TUMOR_LOWER,auto-delete=yes,boot=yes \
+--scopes storage-rw --machine-type n1-standard-4 --project $PROJECT
+
+sleep 20
+
+gcloud compute --project $PROJECT ssh smc-het-eval-$ENTRY_ID-$TUMOR_LOWER "nohup sudo sudo -i -u ubuntu bash /home/ubuntu/SMC-Het-Challenge-Eval/eval_entry_tumor.sh $ENTRY_ID $TUMOR_ID shutdown > /tmp/eval.out 2> /tmp/eval.err &" 

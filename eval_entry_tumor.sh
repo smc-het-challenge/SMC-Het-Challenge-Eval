@@ -29,6 +29,11 @@ gsutil cp -n -r gs://smc-het-evaluation/entries/$ENTRY ./entries/
 venv/bin/python het-evaluate.py docker-rename ./entries/$ENTRY/
 venv/bin/python het-evaluate.py unpack ./entries/$ENTRY/repack/
 
+
+if [ "$3" != "" ]; then
+  nohup sudo shutdown $3 &
+fi
+
 for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
   b=`echo $a | sed -e 's/.mutect.vcf$//'`
   name=`basename $a | sed -e 's/.mutect.vcf$//'`
@@ -40,6 +45,6 @@ for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
 done
 
 
-if [ "$3" == "shutdown" ]; then
+if [ "$3" != "" ]; then
   sudo poweroff
 fi

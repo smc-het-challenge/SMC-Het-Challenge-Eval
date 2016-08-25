@@ -91,6 +91,12 @@ def command_delete(syn, args):
     print "Deleting"
     syn.delete(sub)
 
+def command_deployinfo(syn, args):
+    missing = []
+    evaluation = syn.getEvaluation(EVALUATION_QUEUE_ID)
+    for submission, status in syn.getSubmissionBundles(evaluation):
+        sub = syn.getSubmission(submission.id)
+        print sub.id, sub.entity.instance_type
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -118,6 +124,10 @@ if __name__ == "__main__":
 
     parser_missing = subparsers.add_parser('missing')
     parser_missing.set_defaults(func=command_missing)
+
+    parser_deploy = subparsers.add_parser('deploy-info')
+    parser_deploy.set_defaults(func=command_deployinfo)
+
 
     args = parser.parse_args()
     syn = synapseclient.Synapse()
