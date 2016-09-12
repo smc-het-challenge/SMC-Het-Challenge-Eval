@@ -31,7 +31,7 @@ venv/bin/python het-evaluate.py unpack ./entries/$ENTRY/repack/
 
 
 if [ "$3" != "" ]; then
-  nohup sudo shutdown $3 &
+  nohup ./eval_timeout.sh $ENTRY $TUMOR $3 &
 fi
 
 for a in tumors/$TUMOR/$TUMOR.mutect.vcf; do
