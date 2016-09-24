@@ -209,7 +209,67 @@ def command_unpack(args):
         subprocess.check_call(["tar", "xvzf", os.path.basename(tool_file)], cwd=args.entry)
     for docker_image in glob(os.path.join(args.entry, "*.tar")):
         subprocess.check_call(["docker", "load", "-i", docker_image])
-        
+
+def scan_ouputs(output_dir):
+    results = {}
+    entries = set()
+    tumors = set()
+    for i in glob(os.path.join(output_dir, "*", "*", "*.json")):
+        entry = os.path.basename( os.path.dirname( os.path.dirname(i)) )
+        tumor = os.path.basename( os.path.dirname(i) )
+        entries.add(entry)
+        tumors.add(tumor)
+        step = os.path.basename(i)
+        if entry not in results:
+            results[entry] = {}
+        if tumor not in results[entry]:
+            results[entry][tumor] = {}
+        #print i, entry, tumor
+        with open(i) as handle:
+            results[entry][tumor][step] = json.loads(handle.read())
+    entries = list(entries)
+    tumors = list(tumors)
+    return (entries, tumors, results)
+
+def command_errors(args):
+    entries, tumors, results = scan_ouputs(args.output_dir)
+    
+    for e in entries:
+        for t in tumors:
+            if t in results[e]:
+                for s in results[e][t].values():
+                    if s['exitcode'] != 0:
+                        print e, t, s['tool'], json.dumps(s['stderr'])
+
+def command_timing(args):
+    entries, tumors, results = scan_ouputs(args.output_dir)
+
+    print "\t%s" % ("\t".join(tumors))
+    for e in entries:
+        o = [e]
+        for t in tumors:
+            a = "NoResults"
+            if e in results and t in results[e]:
+                a = "Pass"
+                for r in results[e][t].values():
+                    if r['exitcode'] != 0:
+                        a = "Error"
+            o.append(a)
+        print "\t".join(o)
+
+def command_missing(args):
+    entries, tumors, results = scan_ouputs(args.output_dir)
+
+    for e in entries:
+        for t in tumors:
+            a = "NoResults"
+            if e in results and t in results[e]:
+                a = "Pass"
+                for r in results[e][t].values():
+                    if r['exitcode'] != 0:
+                        a = "Error"
+            print "%s\t%s\t%s" % (e, t, a)
+
 def command_extract(args):
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
@@ -403,6 +463,20 @@ if __name__ == "__main__":
     parser_extract.add_argument("result_dir")
     parser_extract.add_argument("output_dir")
     parser_extract.set_defaults(func=command_extract)
+    
+    parser_timing = subparsers.add_parser('timing')
+    parser_timing.add_argument("output_dir")
+    parser_timing.set_defaults(func=command_timing)
+
+    parser_missing = subparsers.add_parser('missing')
+    parser_missing.add_argument("output_dir")
+    parser_missing.set_defaults(func=command_missing)
+    
+    parser_errors = subparsers.add_parser('errors')
+    parser_errors.add_argument("output_dir")
+    parser_errors.set_defaults(func=command_errors)
+    
+    
     
     args = parser.parse_args()
     args.func(args)
