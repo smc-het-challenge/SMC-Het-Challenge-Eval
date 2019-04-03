@@ -1,0 +1,32 @@
+<tool id="PhyloWGS_Submission_Format" name="PhyloWGS 5 - Submission Format" version="0.1.0">
+  <stdio>
+    <exit_code range="1:" />
+  </stdio>
+  <requirements>
+    <container type="docker">phylowgs:v1.0-rc2</container>
+  </requirements>
+  <command><![CDATA[
+PYTHONPATH='/opt/phylowgs/' python /opt/smchet-challenge/create-smchet-report/write_report.py
+${tree_summary} ${mutations} ${mutation_assignments}
+.
+]]></command>
+    <inputs>
+		<param name="tree_summary" type="data" format="binary" label="Trees.json.gz"/>
+		<param name="mutations" type="data" format="binary" label="mutations.json.gz"/>
+		<param name="mutation_assignments" type="data" format="binary" label="mutation_assignments.json.gz"/>
+    </inputs>
+    <outputs>
+    	<data name="1A" format="text" label="1A.txt" from_work_dir="1A.txt"/>
+    	<data name="1B" format="text" label="1B.txt" from_work_dir="1B.txt"/>
+    	<data name="1C" format="text" label="1C.txt" from_work_dir="1C.txt"/>
+    	<data name="2A" format="text" label="2A.txt" from_work_dir="2A.txt"/>
+    	<data name="2B" format="binary" label="2B.txt.gz" from_work_dir="2B.txt.gz"/>
+    	<data name="3A" format="text" label="3A.txt" from_work_dir="3A.txt"/>
+    	<data name="3B" format="binary" label="3B.txt.gz" from_work_dir="3B.txt.gz"/>
+    </outputs>
+    <help><![CDATA[- Final tool to be executed when using the PhyloWGS example.]]>
+    &#xA;<![CDATA[- Formats the JSON files into submission file for each of the SMC-Het Subchallenges]]>
+    &#xA;<![CDATA[- More information on this tool can be found at https://github.com/morrislab/smchet-challenge/create-smchet-report]]>
+    &#xA;<![CDATA[- Output from this tool should be run through the evaluator tool]]>
+    </help>
+    </tool>

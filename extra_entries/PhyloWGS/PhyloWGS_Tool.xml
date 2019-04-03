@@ -1,0 +1,32 @@
+<tool id="PhyloWGS_Tool" name="PhyloWGS 3 - Tool" version="0.1.0">
+    <stdio>
+        <exit_code range="1:" />
+    </stdio>
+    <requirements>
+        <container type="docker">phylowgs:v1.0-rc2</container>
+    </requirements>
+    <command><![CDATA[
+python /opt/phylowgs/evolve.py
+-s ${MCMC_SAMPLES} -i ${MH_ITERATIONS} -r ${RANDOM_SEED} -B ${BURN_IN}
+-k ${OUTPUT_TOP_K_TREES} -f ${OUTPUT_CLONAL_FREQS}
+${ssm_file} ${cnv_file}
+    ]]></command>
+    <inputs>
+      <param name="ssm_file" type="data" format="tabular" label="Mutation Data"/>
+      <param name="cnv_file" type="data" format="tabular" label="CNV Data"/>
+      <param name="MCMC_SAMPLES" type="integer" value="2500" label="Number of MCMC samples"/>
+      <param name="MH_ITERATIONS" type="integer" value="5000" label="Number of Metropolis-Hastings iterations"/>
+      <param name="BURN_IN" type="integer" value="400" label="Number of burnin samples"/>
+      <param name="RANDOM_SEED" type="integer" value="12345" label="Random seed for initializing MCMC sampler"/>
+    </inputs>
+    <outputs>
+      <data format="text" name="OUTPUT_TOP_K_TREES" label="Top K Trees"/>
+      <data format="text" name="OUTPUT_CLONAL_FREQS" label="Clonal Frequencies"/>
+      <data format="binary" name="TREES" label="trees.zip" from_work_dir="trees.zip"/>
+    </outputs>
+    <help><![CDATA[- Third tool to be executed when using the PhyloWGS example.]]>
+    &#xA;<![CDATA[- Runs the PhyloWGS algorithm described in the 'PhyloWGS: Reconstructing subclonal composition and evolution from whole-genome sequencing of tumors' paper (http://www.genomebiology.com/2015/16/1/35)]]>
+    &#xA;<![CDATA[- More information on this tool can be found at https://github.com/morrislab/phylowgs]]>
+    &#xA;<![CDATA[- Output from this tool will be used in PhyloWGS 4 - Submission Format]]>
+    </help>
+</tool>

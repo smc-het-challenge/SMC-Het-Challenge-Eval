@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<toolbox tool_path="{{ dev_tool_conf_dir }}">
+	<section id="imported" name="Imported Tools">
+		<tool_dir dir="/local_tools" />
+	</section>
+    <section id="evaluation_tools" name="Evaluation Tools">
+         <tool file="/local_tools/smc_het_eval.xml" />
+    </section>
+</toolbox>
