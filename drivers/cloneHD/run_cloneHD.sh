@@ -20,12 +20,13 @@ function usage()
         echo "assembles and executes the command to run cloneHD_tool.sh, then collects and returns "
         echo "the output files as a tarball. "
         echo
-        echo "NOTE #1: The 'run_cloneHD.json~' template file must be in the same directory as *this* script. "
+        echo "NOTE #1: The 'run_cloneHD_template.json' template file must be in the same directory as *this* "
+        echo "script. "
         echo "NOTE #2: The output will be written to a subdirectory called 'outputs' in the same directory"
         echo "         as *this* script. "
         echo "NOTE #3: As assembled now, cloneHD_tool.sh must be run via *this* script."
         echo
-        echo "Usage: $0 [ -t TUMOR -c CWL]"
+        echo "Usage: $0 [ -t TUMOR -c CWL -d DRIVERS]"
         echo
         echo " [-t TUMOR]    - Full path to the *directory* containing the 'tumors' subdirectory; where 'tumors' "
         echo "                 holds a subdirectory for each tumor ID;  each within which resides VCF and CNA "
