@@ -1,0 +1,11 @@
+{
+  "ssmFile" : {
+    "class" : "File",
+    "path" : "input_vcf"
+  },
+  "cnvFile" : {
+    "class" : "File",
+    "path" : "input_cna"
+  },
+  "cellFxn" : cancer_fxn
+}
