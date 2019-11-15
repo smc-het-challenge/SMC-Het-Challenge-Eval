@@ -1,14 +1,15 @@
 #!/bin/bash
 # phyloWGS.sh
 #SBATCH --partition=exacloud
+#SBATCH --account=spellmanlab
 #SBATCH --qos long_jobs
 #SBATCH --time=9-0
 #SBATCH --output=phylowgs-%j.out
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
 #SBATCH --gres disk:1024
-#SBATCH --mincpus=1
-#SBATCH --cpus-per-task=1
+#SBATCH --mincpus=2
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=30G
 
 function usage()
