@@ -8,9 +8,9 @@
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
 #SBATCH --gres disk:1024
-#SBATCH --mincpus=2
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=30G
+#SBATCH --mincpus=8
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=50G
 
 function usage()
 {
@@ -90,7 +90,11 @@ OUTDIR=$DRIVERS/`basename $TUMOR`/phyloWGS_outputs
 
 if [ ! -e $OUTDIR ];
 then
-    mkdir -p $OUTDIR
+    mkdir -p $OUTDIR ;
+fi
+if [ ! -e /mnt/scratch/phyloWGS.* ];
+then
+    rm -rf /mnt/scratch/phyloWGS.* ;
 fi
 
 WORKDIR=`mktemp -d -p /mnt/scratch/ phyloWGS.XXX`
@@ -110,7 +114,7 @@ cp $ALPHA/phylowgs/parser/*cwl $PHYLODIR/parser
 cp $ALPHA/smchet-challenge/create-smchet-report/*cwl $HETDIR/create-smchet-report
 
 cd $PHYLODIR
-cwltool `basename $CWL` `basename $JSON`
+time -o $OUTDIR/runtime.txt cwltool `basename $CWL` `basename $JSON`
 
 if [ ! -z $PHYLODIR/1A.txt ]; then mv $PHYLODIR/1A.txt $PHYLODIR/cellularity.predfile; fi
 if [ ! -z $PHYLODIR/1B.txt ]; then mv $PHYLODIR/1B.txt $PHYLODIR/population.predfile; fi
