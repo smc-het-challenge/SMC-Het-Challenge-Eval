@@ -1,1 +1,0 @@
-../../../phyloWGS/phylowgs/phylowgs.cwl
