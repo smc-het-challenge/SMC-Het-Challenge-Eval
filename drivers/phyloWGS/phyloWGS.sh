@@ -110,7 +110,7 @@ cp $ALPHA/phylowgs/parser/*cwl $PHYLODIR/parser
 cp $ALPHA/smchet-challenge/create-smchet-report/*cwl $HETDIR/create-smchet-report
 
 cd $PHYLODIR
-time -o $OUTDIR/runtime.txt cwltool `basename $CWL` `basename $JSON`
+time {cwltool `basename $CWL` `basename $JSON`} > $OUTDIR/runtime.txt
 
 if [ ! -z $PHYLODIR/1A.txt ]; then mv $PHYLODIR/1A.txt $PHYLODIR/cellularity.predfile; fi
 if [ ! -z $PHYLODIR/1B.txt ]; then mv $PHYLODIR/1B.txt $PHYLODIR/population.predfile; fi
