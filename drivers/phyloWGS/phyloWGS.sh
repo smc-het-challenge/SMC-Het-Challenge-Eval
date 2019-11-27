@@ -3,7 +3,7 @@
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
 #SBATCH --qos long_jobs
-#SBATCH --time=9-0
+#SBATCH --time=09-00:00:00
 #SBATCH --output=phylowgs-%j.out
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
@@ -91,10 +91,6 @@ OUTDIR=$DRIVERS/`basename $TUMOR`/phyloWGS_outputs
 if [ ! -e $OUTDIR ];
 then
     mkdir -p $OUTDIR ;
-fi
-if [ ! -e /mnt/scratch/phyloWGS.* ];
-then
-    rm -rf /mnt/scratch/phyloWGS.* ;
 fi
 
 WORKDIR=`mktemp -d -p /mnt/scratch/ phyloWGS.XXX`
