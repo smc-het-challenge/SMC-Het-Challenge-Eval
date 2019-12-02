@@ -2,8 +2,8 @@
 # phyloWGS.sh
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
-#SBATCH --qos long_jobs
-#SBATCH --time=09-00:00:00
+#SBATCH --qos very_long_jobs
+#SBATCH --time=19-23:00:00
 #SBATCH --output=phylowgs-%j.out
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
@@ -110,7 +110,7 @@ cp $ALPHA/phylowgs/parser/*cwl $PHYLODIR/parser
 cp $ALPHA/smchet-challenge/create-smchet-report/*cwl $HETDIR/create-smchet-report
 
 cd $PHYLODIR
-time {cwltool `basename $CWL` `basename $JSON`} > $OUTDIR/runtime.txt
+( time cwltool `basename $CWL` `basename $JSON` ) 2> $OUTDIR/runtime.txt
 
 if [ ! -z $PHYLODIR/1A.txt ]; then mv $PHYLODIR/1A.txt $PHYLODIR/cellularity.predfile; fi
 if [ ! -z $PHYLODIR/1B.txt ]; then mv $PHYLODIR/1B.txt $PHYLODIR/population.predfile; fi
