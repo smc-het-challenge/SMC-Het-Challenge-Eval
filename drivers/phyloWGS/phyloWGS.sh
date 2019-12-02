@@ -3,7 +3,7 @@
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
 #SBATCH --qos very_long_jobs
-#SBATCH --time=19-23:00:00
+#SBATCH --time=29-23:00:00
 #SBATCH --output=phylowgs-%j.out
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
