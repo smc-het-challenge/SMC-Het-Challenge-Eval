@@ -2,14 +2,14 @@
 # pyclone.sh
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
-#SBATCH --time=04:00:00
+#SBATCH --time=08:00:00
 #SBATCH --output=pyclone-%j.out
 #SBATCH --error=pyclone-%j.err
 #SBATCH --job-name=smchet-pyclone
 #SBATCH --gres disk:1024
-#SBATCH --mincpus=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=10G
+#SBATCH --mincpus=2
+#SBATCH --cpus-per-task=6
+#SBATCH --mem=30G
 
 function usage()
 {

@@ -7,6 +7,6 @@ do
     TUMOR=`basename $LINE`
     mkdir $TUMOR
     pushd $TUMOR
-    ../slurm_pyclone.sh $LINE /home/exacloud/lustre1/SpellmanLab/chiotti/smchet_dream/submission_repos/pyClone
+    ../slurm_pyclone.sh $LINE /home/exacloud/lustre1/SpellmanLab/chiotti/smchet_dream/submission_repos/docker-pyclone
     popd
 done
