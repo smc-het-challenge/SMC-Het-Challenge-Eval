@@ -2,8 +2,8 @@
 # phyloWGS.sh
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
-#SBATCH --qos long_jobs
-#SBATCH --time=09-00:00:00
+#SBATCH --qos=very_long_jobs
+#SBATCH --time=29-12:00:00
 #SBATCH --output=phylowgs-%j.out
 #SBATCH --error=phylowgs-%j.err
 #SBATCH --job-name=smchet-phylowgs
@@ -61,7 +61,13 @@ then
         usage
 fi
 
-source /home/groups/EllrottLab/activate_conda
+if [ ! -f /home/groups/EllrottLab/activate_conda ]
+then
+    source /home/groups/EllrottLab/activate_conda
+else
+    source $DRIVERS/activate_conda
+fi
+
 #ALPHA="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ ! -e $TUMOR ];
@@ -110,7 +116,7 @@ cp $ALPHA/phylowgs/parser/*cwl $PHYLODIR/parser
 cp $ALPHA/smchet-challenge/create-smchet-report/*cwl $HETDIR/create-smchet-report
 
 cd $PHYLODIR
-time -o $OUTDIR/runtime.txt cwltool `basename $CWL` `basename $JSON`
+time /home/users/chiotti/local/bin/cwltool --tmpdir-prefix $WORKDIR/tmpdir/ --tmp-outdir-prefix $WORKDIR/tmpoutdir/ --basedir $WORKDIR `basename $CWL` `basename $JSON` 2>&1
 
 if [ ! -z $PHYLODIR/1A.txt ]; then mv $PHYLODIR/1A.txt $PHYLODIR/cellularity.predfile; fi
 if [ ! -z $PHYLODIR/1B.txt ]; then mv $PHYLODIR/1B.txt $PHYLODIR/population.predfile; fi
@@ -122,5 +128,5 @@ tar -czf phyloWGS.tar.gz *predfile
 rsync -a phyloWGS.tar.gz $OUTDIR
 
 cd $ALPHA
-rm -rf $WORKDIR*
+rm -rf $WORKDIR
 
