@@ -2,14 +2,14 @@
 # pyclone.sh
 #SBATCH --partition=exacloud
 #SBATCH --account=spellmanlab
-#SBATCH --time=08:00:00
+#SBATCH --time=36:00:00
 #SBATCH --output=pyclone-%j.out
 #SBATCH --error=pyclone-%j.err
 #SBATCH --job-name=smchet-pyclone
 #SBATCH --gres disk:1024
 #SBATCH --mincpus=2
 #SBATCH --cpus-per-task=6
-#SBATCH --mem=30G
+#SBATCH --mem=8G
 
 function usage()
 {
@@ -29,11 +29,11 @@ function usage()
         echo "Usage: $0 [ -t TUMOR -c CWL -d DRIVERS -a ALPHA]"
         echo
         echo " [-t TUMOR]    - Full path to the *directory* containing the 'tumors' subdirectory; where 'tumors' "
-        echo "                 holds a subdirectory for each tumor ID;  each within which resides VCF and CNA "
+        echo "                 holds a subdirectory for each tumor ID;  each within which resides VCF, CNA, and purity "
         echo "                 data specific to that tumor [e.g., /<full>/<path>/<to>/tumors/T0_noXY]."
         echo " [-c CWL]      - Full path to the CWL tool [e.g., /<full>/<path>/<to>/pyclone.cwl"
         echo " [-d DRIVERS]  - Full path to *directory* containing shell, json, and submission scripts  [e.g., "
-        echo "                 /<full>/<path>/<to>/drivers/pyclone]. These are the scripts required to run the "
+        echo "                 /<full>/<path>/<to>/drivers/pyClone]. These are the scripts required to run the "
         echo "                 containerized PyClone algorithm. "
         echo " [-a ALPHA     - Full path to the top directory of the pyclone file tree, which contains the scripts "
         echo "                 that run the PyClone algorithm itself. "
@@ -97,20 +97,19 @@ chmod -R g+s $WORKDIR
 JSON=$WORKDIR/pyclone_template.json
 
 sed -e "s|vcf_in|$WORKDIR\/`basename $VCF`|g" -e "s|cna_in|$WORKDIR\/`basename $CNA`|g" -e "s|purity_in|$WORKDIR\/`basename $CELLULARITY`|g" $TMPJSON > $JSON
-cp $VCF $CNA $ALPHA/*cwl $WORKDIR
+cp $VCF $CNA $ALPHA/*cwl $CELLULARITY $ALPHA/run_analysis_pyclone.R $ALPHA/create_ccfclust_inputs.py $WORKDIR
 
 cd $WORKDIR
-( time cwltool `basename $CWL` `basename $JSON` ) 2> $OUTDIR/runtime.txt
+time (cwltool --tmpdir-prefix $WORKDIR/tmpdir/ --tmp-outdir-prefix $WORKDIR/tmpoutdir/ --basedir $WORKDIR/cwldir/ `basename $CWL` `basename $JSON` 1> $OUTDIR/log.txt) 2> $OUTDIR/runtime.txt
+
+if [ ! -z $WORKDIR/2B.txt ]; then gzip $WORKDIR/2B.txt; fi
 
 if [ ! -z $WORKDIR/1B.txt ]; then mv $WORKDIR/1B.txt $WORKDIR/population.predfile; fi
 if [ ! -z $WORKDIR/1C.txt ]; then mv $WORKDIR/1C.txt $WORKDIR/proportion.predfile; fi
 if [ ! -z $WORKDIR/2A.txt ]; then mv $WORKDIR/2A.txt $WORKDIR/cluster_assignment.predfile; fi
-if [ ! -z $WORKDIR/2B.txt.gz ]; then mv $WORKDIR/2B.txt $WORKDIR/cocluster_assignment.predfile; fi
-if [ ! -z $WORKDIR/clonal_results_summary.pdf ]; then mv $WORKDIR/clonal_results_summary.pdf $WORKDIR/clonal_results_summary.predfile
-
+if [ ! -z $WORKDIR/2B.txt.gz ]; then mv $WORKDIR/2B.txt.gz $WORKDIR/cocluster_assignment.predfile; fi
 tar -czf pyClone.tar.gz *predfile
 rsync -a pyClone.tar.gz $OUTDIR
 
 cd $ALPHA
 rm -rf $WORKDIR
-
