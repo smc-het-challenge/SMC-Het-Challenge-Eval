@@ -1,0 +1,10 @@
+{
+  "input_vcf" : {
+    "class" : "File",
+    "path" : "vcf_in"
+  },
+  "battenberg_file" : {
+    "class" : "File",
+    "path" : "cna_in"
+  }
+}
