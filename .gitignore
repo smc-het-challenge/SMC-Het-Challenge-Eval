@@ -4,3 +4,5 @@ trial*
 *noXY*
 *input_list*
 *.txt
+.R*
+drivers/R/
