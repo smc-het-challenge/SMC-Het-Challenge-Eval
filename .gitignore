@@ -6,3 +6,6 @@ trial*
 *.txt
 .R*
 drivers/R/
+*complete*
+*activate_conda
+*md5ck
